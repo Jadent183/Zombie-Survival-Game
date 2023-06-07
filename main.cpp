@@ -3,6 +3,7 @@
 #include <time.h>
 #include <conio.h>
 #include <windows.h>
+#include "Array2D.hpp"
 #include "player.hpp"
 #include "macros.h"
 using namespace std;
@@ -16,66 +17,77 @@ void deleteBoard(int, int, T **);
 template <typename T>
 void addRandom(int, int, int, T, T **);
 template <typename T>
-void playerStartingPos(int, int, T, T **);
+void playerStartingPos(int, int, Player<T> &, Array2D<Player<T>> &);
 char getPlayerDirection();
 template <typename T>
-void movePlayer(int, int, char, Player<T>, T **);
+void movePlayer(char, Player<T> &, Array2D<Player<T>> &);
 template <typename T>
 int getPlayerPosX(int, int, T, T **);
 template <typename T>
 int getPlayerPosY(int, int, T, T **);
+
 template <typename T>
-T setPlayerType(T);
-template <typename T>
-T getPlayerType(T);
+void pBoard(Array2D<T>);
 
 int height = 5;
 int width = 5;
 
 int main(int argc, char **argv)
 {
+
+    Array2D<Player<char>> board2(height, width);
+    board2.fill('o');
+
+    Player<char> player;
+    player.setType('x');
+
+    playerStartingPos(2, 2, player, board2);
+
+    board2.print();
+
+    while (1)
+    {
+        cout << "player X Y: " << player.getPlayerX() << " " << player.getPlayerY() << endl;
+        cout << "move a direction" << endl;
+        movePlayer(getPlayerDirection(), player, board2);
+
+        board2.print();
+    }
+
+    /*
     srand(time(NULL));
-    Player<char> player1;
-    player1.setType('x');
+    Player<char> player;
+    player.setType('x');
 
     auto **board1 = makeBoard(height, width, 'f');
-    playerStartingPos(height, width, player1.getType(), board1);
-    player1.setPlayerX(getPlayerPosX(height, width, player1.getType(), board1));
-    player1.setPlayerY(getPlayerPosY(height, width, player1.getType(), board1));
+    playerStartingPos(height, width, player.getType(), board1);
+    player.setPlayerX(getPlayerPosX(height, width, player.getType(), board1));
+    player.setPlayerY(getPlayerPosY(height, width, player.getType(), board1));
 
     printBoard(height, width, board1);
 
     while (1)
     {
-        cout << player1.getPlayerX() << endl;
-        cout << player1.getPlayerY() << endl;
 
         cout << "move a direction" << endl;
-        // char direction = getPlayerDirection();
-
-        movePlayer(height, width, getPlayerDirection(), player1, board1);
+        movePlayer(height, width, getPlayerDirection(), player, board1);
 
         printBoard(height, width, board1);
     }
-
-    /*
-    auto **board1 = makeBoard(height, width, "t");
-
-    auto player1 = setPlayerType("l");
-    placePlayer(height, width, player1, board1);
-    // addRandom(height, width, 2, 7, board1);
-
-    while (1)
-    {
-        printBoard(height, width, board1);
-        char direction = getPlayerDirection();
-        movePlayer(height, width, direction, player1, board1);
-        cout << "test: " << player1 << endl;
-        // printBoard(height, width, board1);
-    }
-
-    deleteBoard(height, width, board1);
     */
+}
+
+template <typename T>
+void pBoard(Array2D<T> board)
+{
+    for (int i = 0; i < board.getRow(); i++)
+    {
+        for (int j = 0; j < board.getCol(); j++)
+        {
+            cout << board.getValue(i, j) << endl;
+        }
+        cout << endl;
+    }
 }
 
 template <typename T>
@@ -161,10 +173,12 @@ void addRandom(int height, int width, int chance, T value, T **gameBoard)
 }
 
 template <typename T>
-void playerStartingPos(int height, int width, T playerType, T **gameBoard)
+void playerStartingPos(int X, int Y, Player<T> &player, Array2D<Player<T>> &board)
 {
     // Where the player starts on the board
-    gameBoard[height / 2][width / 2] = playerType;
+    board.setValue(Y, X, player.getType());
+    player.setPlayerX(X);
+    player.setPlayerY(Y);
 }
 
 char getPlayerDirection()
@@ -196,62 +210,48 @@ char getPlayerDirection()
 }
 
 template <typename T>
-void movePlayer(int height, int width, char direction, Player<T> player, T **gameBoard)
+void movePlayer(char direction, Player<T> &player, Array2D<Player<T>> &gameBoard)
 {
-    // int playerPosX = getPlayerPosX(height, width, player, gameBoard);
-    // int playerPosY = getPlayerPosY(height, width, player, gameBoard);
-
-    // int playerPosX = player.getPlayerX();
-    // int playerPosY = player.getPlayerY();
 
     switch (direction)
     {
     case 'u':
         player.setPlayerY(player.getPlayerY() - 1); // up
-        cout << "up X: " << player.getPlayerX() << " Y: " << player.getPlayerY() << endl;
         break;
     case 'l':
         player.setPlayerX(player.getPlayerX() - 1); // left
-        cout << "left X: " << player.getPlayerX() << " Y: " << player.getPlayerY() << endl;
         break;
     case 'r':
         player.setPlayerX(player.getPlayerX() + 1); // right
-        cout << "right X: " << player.getPlayerX() << " Y: " << player.getPlayerY() << endl;
         break;
     case 'd':
         player.setPlayerY(player.getPlayerY() + 1); // down
-        cout << "down X: " << player.getPlayerX() << " Y: " << player.getPlayerY() << endl;
         break;
     default:
         break;
     }
 
-    gameBoard[player.getPlayerY()][player.getPlayerX()] = player.getType();
+    gameBoard.setValue(player.getPlayerY(), player.getPlayerX(), player.getType());
 
     /*
-
     switch (direction)
     {
     case 'u':
-        player.setType('x');
-        gameBoard[playerPosX][playerPosY - 1] = 'x'; // up
+        player.setPlayerY(player.getPlayerY() - 1); // up
         break;
     case 'l':
-        player.setType('x');
-        gameBoard[playerPosX - 1][playerPosY] = 'x'; // left
-        break;
-    case 'd':
-        player.setType('x');
-        gameBoard[playerPosX + 1][playerPosY] = 'x'; // right
+        player.setPlayerX(player.getPlayerX() - 1); // left
         break;
     case 'r':
-        player.setType('x');
-        gameBoard[playerPosX][playerPosY + 1] = 'x'; // down
+        player.setPlayerX(player.getPlayerX() + 1); // right
+        break;
+    case 'd':
+        player.setPlayerY(player.getPlayerY() + 1); // down
         break;
     default:
         break;
     }
-    // cout << player << endl;
+    gameBoard[player.getPlayerY()][player.getPlayerX()] = player.getType();
     */
 }
 
@@ -290,16 +290,4 @@ int getPlayerPosY(int height, int width, T playerType, T **gameBoard)
         }
     }
     return playerPosY;
-}
-
-template <typename T>
-T setPlayerType(T value)
-{
-    T player = value;
-    return player;
-}
-template <typename T>
-T getPlayerType(T player)
-{
-    return player;
 }

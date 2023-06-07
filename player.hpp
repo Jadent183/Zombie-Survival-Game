@@ -12,6 +12,8 @@ private:
     T type;
 
 public:
+    Player(const T &x, const T &y, const T &playerType) : posX(x), posY(y), type(playerType) {}
+
     Player();
     Player(T);
     ~Player();
@@ -22,6 +24,14 @@ public:
     int getPlayerY();
     void setPlayerX(int);
     void setPlayerY(int);
+
+    friend class Array2D<Player<T>>;
+
+    friend std::ostream &operator<<(std::ostream &os, const Player<T> &player)
+    {
+        os << player.type;
+        return os;
+    }
 };
 
 template <typename T>
