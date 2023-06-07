@@ -25,6 +25,8 @@ template <typename T>
 int getPlayerPosX(int, int, T, T **);
 template <typename T>
 int getPlayerPosY(int, int, T, T **);
+template <typename T>
+bool validMove(char, Player<T> &, Array2D<Player<T>> &);
 
 template <typename T>
 void pBoard(Array2D<T>);
@@ -47,34 +49,11 @@ int main(int argc, char **argv)
 
     while (1)
     {
-        cout << "player X Y: " << player.getPlayerX() << " " << player.getPlayerY() << endl;
         cout << "move a direction" << endl;
         movePlayer(getPlayerDirection(), player, board2);
 
         board2.print();
     }
-
-    /*
-    srand(time(NULL));
-    Player<char> player;
-    player.setType('x');
-
-    auto **board1 = makeBoard(height, width, 'f');
-    playerStartingPos(height, width, player.getType(), board1);
-    player.setPlayerX(getPlayerPosX(height, width, player.getType(), board1));
-    player.setPlayerY(getPlayerPosY(height, width, player.getType(), board1));
-
-    printBoard(height, width, board1);
-
-    while (1)
-    {
-
-        cout << "move a direction" << endl;
-        movePlayer(height, width, getPlayerDirection(), player, board1);
-
-        printBoard(height, width, board1);
-    }
-    */
 }
 
 template <typename T>
@@ -216,43 +195,90 @@ void movePlayer(char direction, Player<T> &player, Array2D<Player<T>> &gameBoard
     switch (direction)
     {
     case 'u':
-        player.setPlayerY(player.getPlayerY() - 1); // up
+        if (validMove(direction, player, gameBoard))
+        {
+            player.setPlayerY(player.getPlayerY() - 1); // up
+        }
         break;
     case 'l':
-        player.setPlayerX(player.getPlayerX() - 1); // left
+        if (validMove(direction, player, gameBoard))
+        {
+            player.setPlayerX(player.getPlayerX() - 1); // left
+        }
         break;
     case 'r':
-        player.setPlayerX(player.getPlayerX() + 1); // right
+        if (validMove(direction, player, gameBoard))
+        {
+            player.setPlayerX(player.getPlayerX() + 1); // right
+        }
         break;
     case 'd':
-        player.setPlayerY(player.getPlayerY() + 1); // down
+        if (validMove(direction, player, gameBoard))
+        {
+            player.setPlayerY(player.getPlayerY() + 1); // down
+        }
         break;
     default:
         break;
     }
-
     gameBoard.setValue(player.getPlayerY(), player.getPlayerX(), player.getType());
+}
 
-    /*
+template <typename T>
+bool validMove(char direction, Player<T> &player, Array2D<Player<T>> &gameBoard)
+{
     switch (direction)
     {
     case 'u':
-        player.setPlayerY(player.getPlayerY() - 1); // up
+        if (player.getPlayerY() - 1 >= 0)
+        {
+            return true;
+        }
+        else
+        {
+            cout << "invalid move: " << endl;
+            return false;
+        }
         break;
     case 'l':
-        player.setPlayerX(player.getPlayerX() - 1); // left
+        if (player.getPlayerX() - 1 >= 0)
+        {
+            return true;
+        }
+        else
+        {
+            cout << "invalid move: " << endl;
+            return false;
+        }
         break;
     case 'r':
-        player.setPlayerX(player.getPlayerX() + 1); // right
+        if (player.getPlayerX() + 1 <= gameBoard.getCol() - 1)
+        {
+            return true;
+        }
+        else
+        {
+            cout << "invalid move: " << endl;
+            return false;
+        }
         break;
     case 'd':
-        player.setPlayerY(player.getPlayerY() + 1); // down
+        if (player.getPlayerY() + 1 <= gameBoard.getRow() - 1)
+        {
+            return true;
+        }
+        else
+        {
+            cout << "invalid move: " << endl;
+            return false;
+        }
         break;
     default:
         break;
     }
-    gameBoard[player.getPlayerY()][player.getPlayerX()] = player.getType();
-    */
+    cout << "nothring haooend: " << endl;
+
+    return false;
 }
 
 template <typename T>
