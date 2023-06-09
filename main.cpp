@@ -30,6 +30,8 @@ template <typename T>
 bool validMove(char, Player<T> &, Array2D<Player<T>> &);
 template <typename T>
 void zombieStartingPos(Player<T> &, Player<T> &, Array2D<Player<T>> &);
+template <typename T>
+char checkCollisions(Array2D<Player<T>> &, int, int);
 
 template <typename T>
 void pBoard(Array2D<T>);
@@ -73,6 +75,17 @@ int main(int argc, char **argv)
 }
 
 template <typename T>
+char checkCollisions(Array2D<Player<T>> &gameBoard, int row, int col)
+{
+    if (gameBoard.getValue(row, col) == 'z')
+    {
+        return 'z';
+    }
+
+    return 'q';
+}
+
+template <typename T>
 void zombieStartingPos(Player<T> &player, Player<T> &zombie, Array2D<Player<T>> &gameBoard)
 {
     int randX = (rand() % gameBoard.getRow());
@@ -92,6 +105,8 @@ void zombieStartingPos(Player<T> &player, Player<T> &zombie, Array2D<Player<T>> 
             gameBoard.setValue(randY, randX, zombie.getType());
         }
     }
+    zombie.setPlayerX(randX);
+    zombie.setPlayerY(randY);
 }
 
 template <typename T>
@@ -148,8 +163,8 @@ void printBoard(int height, int width, T **gameBoard)
     {
         for (int j = 0; j < width; j++)
         {
-            cout << setw(2) << "|" << RESET;                          // right side line
-            
+            cout << setw(2) << "|" << RESET; // right side line
+
             cout << BOLDGREEN << setw(2) << gameBoard[i][j] << RESET; // gameboard values
         }
         cout << BOLDWHITE << setw(2) << "|"; // far right side line
@@ -239,7 +254,13 @@ void movePlayer(char direction, Player<T> &player, Array2D<Player<T>> &gameBoard
     case 'u':
         if (validMove(direction, player, gameBoard))
         {
-            player.setPlayerY(player.getPlayerY() - 1); // up
+            if (checkCollisions(gameBoard, player.getPlayerY() - 1, player.getPlayerX()) == 'z')
+            {
+            }
+            else
+            {
+                player.setPlayerY(player.getPlayerY() - 1); // move up
+            }
         }
         else
             cout << "invalid move: " << endl;
