@@ -36,7 +36,7 @@ void pBoard(Array2D<T>);
 
 int height = 5;
 int width = 5;
-char tile = 'o';
+char tile = ' '; //primary background tile character
 
 int main(int argc, char **argv)
 {
@@ -51,6 +51,8 @@ int main(int argc, char **argv)
 
     Player<char> zombie;
     zombie.setType('z');
+
+    zombieStartingPos(player, zombie, board2);
 
     playerStartingPos(3, 3, player, board2);
 
