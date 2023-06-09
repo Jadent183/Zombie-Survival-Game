@@ -6,6 +6,7 @@
 #include "Array2D.hpp"
 #include "player.hpp"
 #include "macros.h"
+#include <queue>
 using namespace std;
 
 template <typename T>
@@ -27,32 +28,65 @@ template <typename T>
 int getPlayerPosY(int, int, T, T **);
 template <typename T>
 bool validMove(char, Player<T> &, Array2D<Player<T>> &);
+template <typename T>
+void zombieStartingPos(Player<T> &, Player<T> &, Array2D<Player<T>> &);
 
 template <typename T>
 void pBoard(Array2D<T>);
 
 int height = 5;
 int width = 5;
+char tile = 'o';
 
 int main(int argc, char **argv)
 {
 
+    srand(time(NULL));
+
     Array2D<Player<char>> board2(height, width);
-    board2.fill('o');
+    board2.fill(tile);
 
     Player<char> player;
-    player.setType('x');
+    player.setType('l');
 
-    playerStartingPos(2, 2, player, board2);
+    Player<char> zombie;
+    zombie.setType('z');
+
+    playerStartingPos(3, 3, player, board2);
 
     board2.print();
 
     while (1)
     {
+
+        // Your turn
         cout << "move a direction" << endl;
         movePlayer(getPlayerDirection(), player, board2);
-
         board2.print();
+
+        // Zombie turn
+    }
+}
+
+template <typename T>
+void zombieStartingPos(Player<T> &player, Player<T> &zombie, Array2D<Player<T>> &gameBoard)
+{
+    int randX = (rand() % gameBoard.getRow());
+    int randY = (rand() % gameBoard.getCol());
+
+    if ((randX > player.getPlayerX() + 1) || (randX < player.getPlayerX() - 1) || (randY > player.getPlayerY() + 1) || (randY < player.getPlayerY() - 1))
+    {
+        gameBoard.setValue(randY, randX, zombie.getType());
+    }
+    else
+    {
+        int randX = (rand() % gameBoard.getRow());
+        int randY = (rand() % gameBoard.getCol());
+
+        if ((randX > player.getPlayerX() + 1) || (randX < player.getPlayerX() - 1) || (randY > player.getPlayerY() + 1) || (randY < player.getPlayerY() - 1))
+        {
+            gameBoard.setValue(randY, randX, zombie.getType());
+        }
     }
 }
 
@@ -191,7 +225,10 @@ char getPlayerDirection()
 template <typename T>
 void movePlayer(char direction, Player<T> &player, Array2D<Player<T>> &gameBoard)
 {
+    // update the previous tile that the player moved from
+    gameBoard.setValue(player.getPlayerY(), player.getPlayerX(), tile);
 
+    // update the players new position given from the keyboard
     switch (direction)
     {
     case 'u':
@@ -199,28 +236,39 @@ void movePlayer(char direction, Player<T> &player, Array2D<Player<T>> &gameBoard
         {
             player.setPlayerY(player.getPlayerY() - 1); // up
         }
+        else
+            cout << "invalid move: " << endl;
         break;
     case 'l':
         if (validMove(direction, player, gameBoard))
         {
             player.setPlayerX(player.getPlayerX() - 1); // left
         }
+        else
+            cout << "invalid move: " << endl;
+
         break;
     case 'r':
         if (validMove(direction, player, gameBoard))
         {
             player.setPlayerX(player.getPlayerX() + 1); // right
         }
+        else
+            cout << "invalid move: " << endl;
         break;
     case 'd':
         if (validMove(direction, player, gameBoard))
         {
             player.setPlayerY(player.getPlayerY() + 1); // down
         }
+        else
+            cout << "invalid move: " << endl;
         break;
     default:
         break;
     }
+
+    // update the players current position on the gameboard
     gameBoard.setValue(player.getPlayerY(), player.getPlayerX(), player.getType());
 }
 
@@ -230,40 +278,37 @@ bool validMove(char direction, Player<T> &player, Array2D<Player<T>> &gameBoard)
     switch (direction)
     {
     case 'u':
-        if (player.getPlayerY() - 1 >= 0)
+        if (player.getPlayerY() - 1 >= 0) // up
         {
             return true;
         }
         else
         {
-            cout << "invalid move: " << endl;
             return false;
         }
         break;
     case 'l':
-        if (player.getPlayerX() - 1 >= 0)
+        if (player.getPlayerX() - 1 >= 0) // left
         {
             return true;
         }
         else
         {
-            cout << "invalid move: " << endl;
             return false;
         }
         break;
     case 'r':
-        if (player.getPlayerX() + 1 <= gameBoard.getCol() - 1)
+        if (player.getPlayerX() + 1 <= gameBoard.getCol() - 1) // right
         {
             return true;
         }
         else
         {
-            cout << "invalid move: " << endl;
             return false;
         }
         break;
     case 'd':
-        if (player.getPlayerY() + 1 <= gameBoard.getRow() - 1)
+        if (player.getPlayerY() + 1 <= gameBoard.getRow() - 1) // down
         {
             return true;
         }
