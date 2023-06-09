@@ -81,8 +81,20 @@ public:
         {
             for (int j = 0; j < cols; j++)
             {
-                cout << setw(2) << "|" << RESET;                     // right side line
-                cout << BOLDGREEN << setw(2) << data[i][j] << RESET; // gameboard values
+                cout << setw(2) << "|" << RESET; // right side line
+
+                if (data[i][j] == 'z') // green for zombies
+                {
+                    cout << BOLDGREEN << setw(2) << data[i][j] << RESET; // gameboard values
+                }
+                else if (data[i][j] == 'l') // blue for player
+                {
+                    cout << BOLDBLUE << setw(2) << data[i][j] << RESET; // gameboard values
+                }
+                else // white for everything else
+                {
+                    cout << BOLDWHITE << setw(2) << data[i][j] << RESET; // gameboard values
+                }
             }
             cout << BOLDWHITE << setw(2) << "|"; // far right side line
             cout << endl;

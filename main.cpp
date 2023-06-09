@@ -36,12 +36,14 @@ void pBoard(Array2D<T>);
 
 int height = 5;
 int width = 5;
-char tile = ' '; //primary background tile character
+char tile = ' '; // primary background tile character
+bool keepPlaying;
 
 int main(int argc, char **argv)
 {
 
     srand(time(NULL));
+    keepPlaying = true;
 
     Array2D<Player<char>> board2(height, width);
     board2.fill(tile);
@@ -58,7 +60,7 @@ int main(int argc, char **argv)
 
     board2.print();
 
-    while (1)
+    while (keepPlaying == true)
     {
 
         // Your turn
@@ -147,6 +149,7 @@ void printBoard(int height, int width, T **gameBoard)
         for (int j = 0; j < width; j++)
         {
             cout << setw(2) << "|" << RESET;                          // right side line
+            
             cout << BOLDGREEN << setw(2) << gameBoard[i][j] << RESET; // gameboard values
         }
         cout << BOLDWHITE << setw(2) << "|"; // far right side line
@@ -221,7 +224,7 @@ char getPlayerDirection()
             return 'n';
         }
     }
-    return 'n';
+    return ch;
 }
 
 template <typename T>
@@ -266,6 +269,8 @@ void movePlayer(char direction, Player<T> &player, Array2D<Player<T>> &gameBoard
         else
             cout << "invalid move: " << endl;
         break;
+    case 'q':
+        keepPlaying = false;
     default:
         break;
     }

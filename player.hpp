@@ -32,6 +32,10 @@ public:
         os << player.type;
         return os;
     }
+    friend bool operator==(const Player<T> &lhs, const Player<T> &rhs)
+    {
+        return (lhs.posX == rhs.posX) && (lhs.posY == rhs.posY) && (lhs.type == rhs.type);
+    }
 };
 
 template <typename T>
