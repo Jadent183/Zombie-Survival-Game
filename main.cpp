@@ -23,6 +23,10 @@ char checkCollisions(Array2D<Player<T>> &, int, int);
 void zombieDeath();
 template <typename T>
 void zombieMove(Array2D<Player<T>> &, Player<T> &);
+void welcomeScreen();
+char difficultyDecision();
+
+void easyDifficultyGame();
 
 template <typename T>
 void pBoard(Array2D<T>);
@@ -36,7 +40,23 @@ int main(int argc, char **argv)
 {
 
     srand(time(NULL));
+    welcomeScreen();
+    char difficulty = difficultyDecision();
 
+    if (difficulty == '1')
+    {
+        easyDifficultyGame();
+    }
+    else if (difficulty == '2')
+    {
+    }
+    else if (difficulty == '3')
+    {
+    }
+}
+
+void easyDifficultyGame()
+{
     Array2D<Player<char>> board2(height, width);
     board2.fill(tile);
 
@@ -46,9 +66,8 @@ int main(int argc, char **argv)
     Player<char> zombie;
     zombie.setType('z');
 
-    zombieStartingPos(player, zombie, board2);
-
     playerStartingPos(3, 3, player, board2);
+    zombieStartingPos(player, zombie, board2);
 
     keepPlaying = true;
     while (keepPlaying == true)
@@ -56,13 +75,49 @@ int main(int argc, char **argv)
 
         // Your turn
         board2.print();
-        cout << "move a direction" << endl;
+        cout << setw(3) << BOLDBLUE << "Your turn, move a direction" << RESET << endl;
         movePlayer(getPlayerDirection(), player, board2);
+        board2.print();
 
         // Zombie turn
-        // zombieStartingPos(player, zombie, board2);
+        cout << setw(3) << BOLDGREEN << "Zombies turn" << RESET << endl;
+        Sleep(750);
         zombieMove(board2, zombie);
+        // zombieStartingPos(player, zombie, board2);
     }
+}
+
+char difficultyDecision()
+{
+    char ch = getch();
+
+    while ((ch != '1') && (ch != '2') && (ch != '3'))
+    {
+        ch = getch();
+    }
+    return ch;
+}
+
+void welcomeScreen()
+{
+    cout << setw(4) << BOLDRED << "WELCOME TO ";
+    Sleep(450);
+    cout << setw(5) << BOLDGREEN << "TILE SURVIVOR" << RESET << endl;
+    Sleep(1000);
+    for (int i = 0; i < 50; i++)
+    {
+        cout << BOLDWHITE << "*";
+        Sleep(20);
+    }
+    cout << RESET << endl;
+    cout << RESET << endl;
+    cout << setw(2) << BOLDWHITE << "CHOOSE DIFFICULTY!! " << RESET << endl;
+    Sleep(800);
+    cout << setw(2) << BOLDGREEN << "Press 1 for easy" << RESET << endl;
+    Sleep(800);
+    cout << setw(2) << BOLDBLUE << "Press 2 for normal" << RESET << endl;
+    Sleep(800);
+    cout << setw(2) << BOLDRED << "Press 3 for hard" << RESET << endl;
 }
 
 template <typename T>
@@ -81,42 +136,64 @@ void zombieMove(Array2D<Player<T>> &gameBoard, Player<T> &zombie)
         direction = 'u';
         if (validMove(direction, zombie, gameBoard))
         {
-            zombie.setPlayerY(zombie.getPlayerY() - 1); // up
-            cout << "up" << endl;
+            if (checkCollisions(gameBoard, zombie.getPlayerY() - 1, zombie.getPlayerX()) == 'l') // zombie hits player
+            {
+                zombieDeath();
+            }
+            else
+            {
+                zombie.setPlayerY(zombie.getPlayerY() - 1); // up
+            }
         }
         break;
     case 2:
         direction = 'l';
         if (validMove(direction, zombie, gameBoard))
         {
-            zombie.setPlayerX(zombie.getPlayerX() - 1); // left
-            cout << "left" << endl;
+            if (checkCollisions(gameBoard, zombie.getPlayerY(), zombie.getPlayerX() - 1) == 'l') // zombie hits player
+            {
+                zombieDeath();
+            }
+            else
+            {
+                zombie.setPlayerX(zombie.getPlayerX() - 1); // left
+            }
         }
         break;
     case 3:
         direction = 'r';
         if (validMove(direction, zombie, gameBoard))
         {
-            zombie.setPlayerX(zombie.getPlayerX() + 1); // right
-            cout << "right" << endl;
+            if (checkCollisions(gameBoard, zombie.getPlayerY(), zombie.getPlayerX() - 1) == 'l') // zombie hits player
+            {
+                zombieDeath();
+            }
+            else
+            {
+                zombie.setPlayerX(zombie.getPlayerX() + 1); // right
+            }
         }
         break;
     case 4:
         direction = 'd';
         if (validMove(direction, zombie, gameBoard))
         {
-            zombie.setPlayerY(zombie.getPlayerY() + 1); // down
-            cout << "doen" << endl;
+            if (checkCollisions(gameBoard, zombie.getPlayerY() + 1, zombie.getPlayerX()) == 'l') // zombie hits player
+            {
+                zombieDeath();
+            }
+            else
+            {
+                zombie.setPlayerY(zombie.getPlayerY() + 1); // down
+            }
         }
         break;
     case 5:
-        cout << "no" << endl;
         break; // no move
     default:
         break;
     }
     gameBoard.setValue(zombie.getPlayerY(), zombie.getPlayerX(), zombie.getType());
-    // check for a player collision
 }
 
 template <typename T>
@@ -126,8 +203,12 @@ char checkCollisions(Array2D<Player<T>> &gameBoard, int row, int col)
     {
         return 'z';
     }
+    if (gameBoard.getValue(row, col) == 'l')
+    {
+        return 'l';
+    }
 
-    return 'q';
+    return 'n';
 }
 
 template <typename T>
@@ -136,11 +217,23 @@ void zombieStartingPos(Player<T> &player, Player<T> &zombie, Array2D<Player<T>> 
     int randY = (rand() % gameBoard.getRow());
     int randX = (rand() % gameBoard.getCol());
 
-    if ((randX > player.getPlayerX() + 1) || (randX < player.getPlayerX() - 1) || (randY > player.getPlayerY() + 1) || (randY < player.getPlayerY() - 1))
+    if ((randX > player.getPlayerX() + 1) || (randX < player.getPlayerX() - 1) || (randY > player.getPlayerY() + 1) || (randY < player.getPlayerY() - 1) || (randX != player.getPlayerX()) || (randY != player.getPlayerY()))
     {
         gameBoard.setValue(randY, randX, zombie.getType());
         zombie.setPlayerX(randX);
         zombie.setPlayerY(randY);
+    }
+    else
+    {
+        int randY = (rand() % gameBoard.getRow());
+        int randX = (rand() % gameBoard.getCol());
+
+        if ((randX > player.getPlayerX() + 1) || (randX < player.getPlayerX() - 1) || (randY > player.getPlayerY() + 1) || (randY < player.getPlayerY() - 1) || (randX != player.getPlayerX()) || (randY != player.getPlayerY()))
+        {
+            gameBoard.setValue(randY, randX, zombie.getType());
+            zombie.setPlayerX(randX);
+            zombie.setPlayerY(randY);
+        }
     }
 }
 
