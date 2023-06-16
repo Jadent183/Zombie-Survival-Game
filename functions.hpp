@@ -38,7 +38,7 @@ int height = 5;
 int width = 5;
 
 // time delay in miliseconds between rounds
-int timeBetweenRounds = 750;
+int timeBetweenRounds = 75;
 
 // primary background tile character
 char tile = ' ';
@@ -48,6 +48,7 @@ char bombType = 'o';
 
 void easyDifficultyGame()
 {
+    srand(time(NULL));
 
     Array2D<Player<char>> board2(height, width);
     board2.fill(tile);
@@ -55,15 +56,17 @@ void easyDifficultyGame()
     Player<char> player;
     player.setType('l');
 
+    entityStartingPos(3, 3, player, board2);
+
     Player<char> zombie;
     zombie.setType('z');
-
-    Player<char> bomb;
-    bomb.setType(bombType);
-
-    entityStartingPos(3, 3, player, board2);
     EntityAwayFromPlayerSpawnPoint(player, zombie, board2);
-    entityStartingPos(1, 1, bomb, board2);
+    // Player<char> zombie1;
+    // zombie.setType('z');
+    // EntityAwayFromPlayerSpawnPoint(player, zombie, board2);
+    // Player<char> zombie2;
+    // zombie.setType('z');
+    // EntityAwayFromPlayerSpawnPoint(player, zombie, board2);
 
     keepPlaying = true;
     while (keepPlaying == true)
@@ -79,6 +82,9 @@ void easyDifficultyGame()
         cout << setw(3) << BOLDGREEN << "Zombies turn" << RESET << endl;
         Sleep(timeBetweenRounds);
         zombieMove(board2, zombie);
+        // zombieMove(board2, zombie1);
+        // zombieMove(board2, zombie2);
+
         // PlayerAwayFromPlayerSpawnPoint(player, zombie, board2);
     }
 }
@@ -253,7 +259,7 @@ char checkCollisions(Array2D<Player<T>> &gameBoard, int row, int col)
 }
 
 template <typename T>
-void PlayerAwayFromPlayerSpawnPoint(Player<T> &player, Player<T> &zombie, Array2D<Player<T>> &gameBoard)
+void EntityAwayFromPlayerSpawnPoint(Player<T> &player, Player<T> &zombie, Array2D<Player<T>> &gameBoard)
 {
     int randY = (rand() % gameBoard.getRow());
     int randX = (rand() % gameBoard.getCol());
