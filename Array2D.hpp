@@ -87,7 +87,7 @@ public:
                 {
                     cout << BOLDGREEN << setw(2) << data[i][j] << RESET; // gameboard values
                 }
-                else if (data[i][j] == 'l') // blue for player
+                else if (data[i][j] == 'l') // blue for Player
                 {
                     cout << BOLDBLUE << setw(2) << data[i][j] << RESET; // gameboard values
                 }

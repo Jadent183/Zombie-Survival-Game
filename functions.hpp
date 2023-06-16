@@ -4,6 +4,7 @@
 #include <time.h>
 #include <conio.h>
 #include <windows.h>
+#include <queue>
 #include "Array2D.hpp"
 #include "player.hpp"
 #include "macros.h"
@@ -11,14 +12,14 @@ using namespace std;
 #define functions_hpp
 
 template <typename T>
-void playerStartingPos(int, int, Player<T> &, Array2D<Player<T>> &);
-char getPlayerDirection();
+void entityStartingPos(int, int, Player<T> &, Array2D<Player<T>> &);
+char getUserDirection();
 template <typename T>
 void movePlayer(char, Player<T> &, Array2D<Player<T>> &);
 template <typename T>
-bool validMove(char, Player<T> &, Array2D<Player<T>> &);
+bool inBounds(char, Player<T> &, Array2D<Player<T>> &);
 template <typename T>
-void zombieStartingPos(Player<T> &, Player<T> &, Array2D<Player<T>> &);
+void EntityAwayFromPlayerSpawnPoint(Player<T> &, Player<T> &, Array2D<Player<T>> &);
 template <typename T>
 char checkCollisions(Array2D<Player<T>> &, int, int);
 void zombieDeath();
@@ -26,16 +27,28 @@ template <typename T>
 void zombieMove(Array2D<Player<T>> &, Player<T> &);
 void welcomeScreen();
 char difficultyDecision();
-
 void easyDifficultyGame();
+template <typename T>
+void bombCollisionDectction(Array2D<Player<T>> &);
+template <typename T>
+void bombExplosion(int, int, Array2D<Player<T>> &);
 
+// gameBoard size
 int height = 5;
 int width = 5;
-char tile = ' '; // primary background tile character
+
+// time delay in miliseconds between rounds
+int timeBetweenRounds = 750;
+
+// primary background tile character
+char tile = ' ';
+
 bool keepPlaying;
+char bombType = 'o';
 
 void easyDifficultyGame()
 {
+
     Array2D<Player<char>> board2(height, width);
     board2.fill(tile);
 
@@ -45,8 +58,12 @@ void easyDifficultyGame()
     Player<char> zombie;
     zombie.setType('z');
 
-    playerStartingPos(3, 3, player, board2);
-    zombieStartingPos(player, zombie, board2);
+    Player<char> bomb;
+    bomb.setType(bombType);
+
+    entityStartingPos(3, 3, player, board2);
+    EntityAwayFromPlayerSpawnPoint(player, zombie, board2);
+    entityStartingPos(1, 1, bomb, board2);
 
     keepPlaying = true;
     while (keepPlaying == true)
@@ -55,15 +72,60 @@ void easyDifficultyGame()
         // Your turn
         board2.print();
         cout << setw(3) << BOLDBLUE << "Your turn, move a direction" << RESET << endl;
-        movePlayer(getPlayerDirection(), player, board2);
+        movePlayer(getUserDirection(), player, board2);
         board2.print();
 
         // Zombie turn
         cout << setw(3) << BOLDGREEN << "Zombies turn" << RESET << endl;
-        Sleep(750);
+        Sleep(timeBetweenRounds);
         zombieMove(board2, zombie);
-        // zombieStartingPos(player, zombie, board2);
+        // PlayerAwayFromPlayerSpawnPoint(player, zombie, board2);
     }
+}
+
+template <typename T>
+void bombCollisionDectction(Array2D<Player<T>> &gameBoard)
+{
+    for (int i = 0; i < gameBoard.getRow(); i++)
+    {
+        for (int j = 0; j < gameBoard.getCol(); j++)
+        {
+            if (gameBoard.getValue(i, j) == bombType)
+            {
+                // todo
+                // make bomb explode entire game board with a wave effect
+                bombExplosion(i, j, gameBoard);
+            }
+        }
+    }
+}
+
+template <typename T>
+void bombExplosion(int row, int col, Array2D<Player<T>> &gameBoard)
+{
+    // int maxRow = gameBoard.getRow();
+    // int maxCol = gameBoard.getCol();
+
+    // todo:
+    // get each neighboring tile of the starting tile (row + 1, row - 1, col + 1, col - 1)
+    int surrRow[] = {-1, 0, 1, 0};
+    int surrCol[] = {0, -1, 0, 1};
+
+    queue<int> qRow;
+    queue<int> qCol;
+
+    for (int i = 0; i < 4; i++)
+    {
+        int yRow = row + surrRow[i];
+        int xCol = col + surrCol[i];
+
+        qRow.push(yRow);
+        qCol.push(xCol);
+
+        gameBoard.setValue(yRow, xCol, 'X');
+    }
+
+    //
 }
 
 char difficultyDecision()
@@ -113,7 +175,7 @@ void zombieMove(Array2D<Player<T>> &gameBoard, Player<T> &zombie)
     {
     case 1:
         direction = 'u';
-        if (validMove(direction, zombie, gameBoard))
+        if (inBounds(direction, zombie, gameBoard))
         {
             if (checkCollisions(gameBoard, zombie.getPlayerY() - 1, zombie.getPlayerX()) == 'l') // zombie hits player
             {
@@ -127,7 +189,7 @@ void zombieMove(Array2D<Player<T>> &gameBoard, Player<T> &zombie)
         break;
     case 2:
         direction = 'l';
-        if (validMove(direction, zombie, gameBoard))
+        if (inBounds(direction, zombie, gameBoard))
         {
             if (checkCollisions(gameBoard, zombie.getPlayerY(), zombie.getPlayerX() - 1) == 'l') // zombie hits player
             {
@@ -141,7 +203,7 @@ void zombieMove(Array2D<Player<T>> &gameBoard, Player<T> &zombie)
         break;
     case 3:
         direction = 'r';
-        if (validMove(direction, zombie, gameBoard))
+        if (inBounds(direction, zombie, gameBoard))
         {
             if (checkCollisions(gameBoard, zombie.getPlayerY(), zombie.getPlayerX() - 1) == 'l') // zombie hits player
             {
@@ -155,7 +217,7 @@ void zombieMove(Array2D<Player<T>> &gameBoard, Player<T> &zombie)
         break;
     case 4:
         direction = 'd';
-        if (validMove(direction, zombie, gameBoard))
+        if (inBounds(direction, zombie, gameBoard))
         {
             if (checkCollisions(gameBoard, zombie.getPlayerY() + 1, zombie.getPlayerX()) == 'l') // zombie hits player
             {
@@ -191,7 +253,7 @@ char checkCollisions(Array2D<Player<T>> &gameBoard, int row, int col)
 }
 
 template <typename T>
-void zombieStartingPos(Player<T> &player, Player<T> &zombie, Array2D<Player<T>> &gameBoard)
+void PlayerAwayFromPlayerSpawnPoint(Player<T> &player, Player<T> &zombie, Array2D<Player<T>> &gameBoard)
 {
     int randY = (rand() % gameBoard.getRow());
     int randX = (rand() % gameBoard.getCol());
@@ -230,7 +292,7 @@ void pBoard(Array2D<T> board)
 }
 
 template <typename T>
-void playerStartingPos(int X, int Y, Player<T> &player, Array2D<Player<T>> &board)
+void entityStartingPos(int X, int Y, Player<T> &player, Array2D<Player<T>> &board)
 {
     // Where the player starts on the board
     board.setValue(Y, X, player.getType());
@@ -238,7 +300,7 @@ void playerStartingPos(int X, int Y, Player<T> &player, Array2D<Player<T>> &boar
     player.setPlayerY(Y);
 }
 
-char getPlayerDirection()
+char getUserDirection()
 {
     // get the direction taken from the user's arrow keys
     int ch = getch();
@@ -276,11 +338,16 @@ void movePlayer(char direction, Player<T> &player, Array2D<Player<T>> &gameBoard
     switch (direction)
     {
     case 'u':
-        if (validMove(direction, player, gameBoard))
+        if (inBounds(direction, player, gameBoard))
         {
             if (checkCollisions(gameBoard, player.getPlayerY() - 1, player.getPlayerX()) == 'z') // player hits zombie
             {
                 zombieDeath();
+            }
+            else if (checkCollisions(gameBoard, player.getPlayerY() - 1, player.getPlayerX()) == bombType) // player hits bomb
+            {
+                cout << "boomb" << endl;
+                bombCollisionDectction(gameBoard);
             }
             else
             {
@@ -291,11 +358,15 @@ void movePlayer(char direction, Player<T> &player, Array2D<Player<T>> &gameBoard
             cout << "invalid move: " << endl;
         break;
     case 'l':
-        if (validMove(direction, player, gameBoard))
+        if (inBounds(direction, player, gameBoard))
         {
             if (checkCollisions(gameBoard, player.getPlayerY(), player.getPlayerX() - 1) == 'z') // player hits zombie
             {
                 zombieDeath();
+            }
+            else if (checkCollisions(gameBoard, player.getPlayerY(), player.getPlayerX() - 1) == bombType) // player hits bomb
+            {
+                bombCollisionDectction(gameBoard);
             }
             else
             {
@@ -307,11 +378,15 @@ void movePlayer(char direction, Player<T> &player, Array2D<Player<T>> &gameBoard
 
         break;
     case 'r':
-        if (validMove(direction, player, gameBoard))
+        if (inBounds(direction, player, gameBoard))
         {
             if (checkCollisions(gameBoard, player.getPlayerY(), player.getPlayerX() + 1) == 'z') // player hits zombie
             {
                 zombieDeath();
+            }
+            else if (checkCollisions(gameBoard, player.getPlayerY(), player.getPlayerX() + 1) == bombType) // player hits bomb
+            {
+                bombCollisionDectction(gameBoard);
             }
             else
             {
@@ -322,11 +397,15 @@ void movePlayer(char direction, Player<T> &player, Array2D<Player<T>> &gameBoard
             cout << "invalid move: " << endl;
         break;
     case 'd':
-        if (validMove(direction, player, gameBoard))
+        if (inBounds(direction, player, gameBoard))
         {
             if (checkCollisions(gameBoard, player.getPlayerY() + 1, player.getPlayerX()) == 'z') // player hits zombie
             {
                 zombieDeath();
+            }
+            else if (checkCollisions(gameBoard, player.getPlayerY() + 1, player.getPlayerX()) == bombType) // player hits bomb
+            {
+                bombCollisionDectction(gameBoard);
             }
             else
             {
@@ -353,7 +432,7 @@ void zombieDeath()
 }
 
 template <typename T>
-bool validMove(char direction, Player<T> &player, Array2D<Player<T>> &gameBoard)
+bool inBounds(char direction, Player<T> &player, Array2D<Player<T>> &gameBoard)
 {
     switch (direction)
     {

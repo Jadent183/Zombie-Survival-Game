@@ -1,5 +1,5 @@
 #include <iostream>
-#define player_HPP
+#define Player_HPP
 #pragma once
 using namespace std;
 
@@ -12,7 +12,7 @@ private:
     T type;
 
 public:
-    Player(const T &x, const T &y, const T &playerType) : posX(x), posY(y), type(playerType) {}
+    Player(const T &x, const T &y, const T &PlayerType) : posX(x), posY(y), type(PlayerType) {}
 
     Player();
     Player(T);
@@ -27,9 +27,9 @@ public:
 
     friend class Array2D<Player<T>>;
 
-    friend std::ostream &operator<<(std::ostream &os, const Player<T> &player)
+    friend std::ostream &operator<<(std::ostream &os, const Player<T> &Player)
     {
-        os << player.type;
+        os << Player.type;
         return os;
     }
     friend bool operator==(const Player<T> &lhs, const Player<T> &rhs)
@@ -80,13 +80,13 @@ int Player<T>::getPlayerY()
 }
 
 template <typename T>
-void Player<T>::setPlayerX(int playerX)
+void Player<T>::setPlayerX(int PlayerX)
 {
-    this->posX = playerX;
+    this->posX = PlayerX;
 }
 
 template <typename T>
-void Player<T>::setPlayerY(int playerY)
+void Player<T>::setPlayerY(int PlayerY)
 {
-    this->posY = playerY;
+    this->posY = PlayerY;
 }
